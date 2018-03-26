@@ -7,9 +7,10 @@ class myThread (threading.Thread):
 		threading.Thread.__init__(self)
 		self.val = 0
 
-	def run_thread(self, matrizA, matrizB, i, j	):
-		for k in range(len(matrizA)):
-			self.val += int(matrizA[i][k])*int(matrizB[k][j])
+	def run_thread(self, matrizA, matrizB, i):
+		for j in range(len(matrizA)):
+			for k in range(len(matrizA)):
+				self.val += int(matrizA[i][k])*int(matrizB[k][j])
 		return self.val
 
 def prodMatrix_con(matrizA, matrizB):
@@ -18,11 +19,10 @@ def prodMatrix_con(matrizA, matrizB):
 	
 	for i in range(sizeA):	
 		matrizR.append([])
-		for j in range(sizeA):
-			thread1 = myThread()
-			thread1.start()
-			val = thread1.run_thread(matrizA,matrizB,i,j)
-			matrizR[i].append(val)
+		thread1 = myThread()
+		thread1.start()
+		val = thread1.run_thread(matrizA,matrizB,i)
+		matrizR[i].append(val)
 	return matrizR
 
 def prodMatrix_seq(matrizA, matrizB):
@@ -56,21 +56,38 @@ if __name__ == "__main__":
 	matrizB = list((line.split()) for line in mB if line.strip())
 	del(matrizA[0])
 	del(matrizB[0])
-	ini = time.time()
+	
+	#sequencial
 	if (exe is 'S'): 
+		ini = time.time()
 		matrizR = prodMatrix_seq(matrizA, matrizB)
 		fim = time.time()
 		print ("Tempo de execução sequencial: ", (fim-ini))
-
+	#concorrente
 	elif (exe is 'C'): 
+		ini = time.time()
 		matrizR = prodMatrix_con(matrizA, matrizB)   
 		fim = time.time()
 		print ("Tempo de execução concorrente: ", (fim-ini))
+	#analise
+	elif(exe is 'A'):
+		print ("Sequencial: ")
+		for i in range(20):
+			ini = time.time()
+			matrizR = prodMatrix_seq(matrizA, matrizB)
+			fim = time.time()
+			print (i, " - Tempo de execução sequencial: ", (fim-ini))
+	
+		print ("Concorrente: ")
+		for i in range(20):
+			ini = time.time()
+			matrizR = prodMatrix_con(matrizA, matrizB)
+			fim = time.time()
+			print (i, " - Tempo de execução concorrente: ", (fim-ini))
 
 	else:
 		print("ERRO NA ENTRADA")
-	fim = time.time()
-	
+
 	file_name = "C"+dim+"x"+dim+".txt"
 	arq = open(file_name, 'w')
 	for linha in matrizR:
